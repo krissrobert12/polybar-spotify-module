@@ -7,7 +7,7 @@
 #include <string.h>
 #include <time.h>
 
-void print_string_iter(DBusMessageIter *iter) {
+void print_string_iter(DBusMessageIter* iter) {
     int type = dbus_message_iter_get_arg_type(iter);
 
     if (type == DBUS_TYPE_STRING) {
@@ -17,10 +17,10 @@ void print_string_iter(DBusMessageIter *iter) {
     }
 }
 
-char *iter_get_string(DBusMessageIter *iter) {
+char* iter_get_string(DBusMessageIter* iter) {
     int type = dbus_message_iter_get_arg_type(iter);
 
-    char *str;
+    char* str;
 
     // Make sure it is a string
     if (type == DBUS_TYPE_STRING) {
@@ -29,7 +29,7 @@ char *iter_get_string(DBusMessageIter *iter) {
 
         // +1 for null char
         size_t size = (strlen(value.str) + 1) * sizeof(char);
-        str = (char *)malloc(size);
+        str = (char*)malloc(size);
         strcpy(str, value.str);
 
         return str;
@@ -38,8 +38,8 @@ char *iter_get_string(DBusMessageIter *iter) {
     return NULL;
 }
 
-dbus_bool_t recurse_iter_of_type(DBusMessageIter *iter,
-                                 DBusMessageIter *subiter, const int type) {
+dbus_bool_t recurse_iter_of_type(DBusMessageIter* iter,
+                                 DBusMessageIter* subiter, const int type) {
     const int iter_type = dbus_message_iter_get_arg_type(iter);
 
     // Check if iter type matches
@@ -52,10 +52,10 @@ dbus_bool_t recurse_iter_of_type(DBusMessageIter *iter,
     return FALSE;
 }
 
-dbus_bool_t recurse_iter_of_signature(DBusMessageIter *iter,
-                                      DBusMessageIter *subiter,
-                                      const char *signature) {
-    char *iter_signature = dbus_message_iter_get_signature(iter);
+dbus_bool_t recurse_iter_of_signature(DBusMessageIter* iter,
+                                      DBusMessageIter* subiter,
+                                      const char* signature) {
+    char* iter_signature = dbus_message_iter_get_signature(iter);
 
     // Check if iter signature matches
     if (strcmp(iter_signature, signature) == 0) {
@@ -69,10 +69,10 @@ dbus_bool_t recurse_iter_of_signature(DBusMessageIter *iter,
     }
 }
 
-dbus_bool_t iter_go_to_key(DBusMessageIter *element_iter,
-                           DBusMessageIter *entry_iter, const char *key) {
+dbus_bool_t iter_go_to_key(DBusMessageIter* element_iter,
+                           DBusMessageIter* entry_iter, const char* key) {
     const int iter_type = dbus_message_iter_get_arg_type(element_iter);
-    char *iter_signature = dbus_message_iter_get_signature(element_iter);
+    char* iter_signature = dbus_message_iter_get_signature(element_iter);
 
     // Make sure iter is on dict entry and signature matches string-variant
     // entry
@@ -95,7 +95,7 @@ dbus_bool_t iter_go_to_key(DBusMessageIter *element_iter,
         // Get dict entry key
         DBusBasicValue value;
         dbus_message_iter_get_basic(entry_iter, &value);
-        const char *k = value.str;
+        const char* k = value.str;
 
         // Check if dict key matches key argument
         if (strcmp(k, key) == 0) {
@@ -112,37 +112,40 @@ dbus_bool_t iter_go_to_key(DBusMessageIter *element_iter,
     return FALSE;
 }
 
-dbus_bool_t iter_try_step_into_type(DBusMessageIter *iter, const int type) {
+dbus_bool_t iter_try_step_into_type(DBusMessageIter* iter, const int type) {
     DBusMessageIter sub_iter;
 
     // Try to initialize sub_iter inside container pointed to by iter if type
     // matches
-    if (!recurse_iter_of_type(iter, &sub_iter, type)) return FALSE;
+    if (!recurse_iter_of_type(iter, &sub_iter, type))
+        return FALSE;
 
     *iter = sub_iter;
 
     return TRUE;
 }
 
-dbus_bool_t iter_try_step_to_key(DBusMessageIter *element_iter,
-                                 const char *key) {
+dbus_bool_t iter_try_step_to_key(DBusMessageIter* element_iter,
+                                 const char* key) {
     DBusMessageIter kv_iter;
 
     // Try to initialize kv_iter at value associated with key
-    if (!iter_go_to_key(element_iter, &kv_iter, key)) return FALSE;
+    if (!iter_go_to_key(element_iter, &kv_iter, key))
+        return FALSE;
 
     *element_iter = kv_iter;
 
     return TRUE;
 }
 
-dbus_bool_t iter_try_step_into_signature(DBusMessageIter *iter,
-                                         const char *signature) {
+dbus_bool_t iter_try_step_into_signature(DBusMessageIter* iter,
+                                         const char* signature) {
     DBusMessageIter sub_iter;
 
     // Try to initialize sub_iter insider container pointed to by iter if
     // signature matches
-    if (!recurse_iter_of_signature(iter, &sub_iter, signature)) return FALSE;
+    if (!recurse_iter_of_signature(iter, &sub_iter, signature))
+        return FALSE;
 
     *iter = sub_iter;
 
@@ -171,17 +174,17 @@ dbus_bool_t msleep(const long milliseconds) {
     return TRUE;
 }
 
-char *join_path(const char *p1, const char *p2) {
+char* join_path(const char* p1, const char* p2) {
     const size_t len1 = strlen(p1);
     const size_t len2 = strlen(p2);
 
-    char *res;
+    char* res;
 
     // Check if last character of p1 is '/'
     if (p1[len1 - 1] != '/') {
         // +1 for null char and +1 for '/'
         const size_t res_size = (len1 + len2 + 2) * sizeof(char);
-        res = (char *)malloc(res_size);
+        res = (char*)malloc(res_size);
 
         // Join p1 and p2 with '/'
         strcpy(res, p1);
@@ -192,7 +195,7 @@ char *join_path(const char *p1, const char *p2) {
     } else if (p1[len1 - 1] == '/') {
         // +1 for null char
         const size_t res_size = (len1 + len2 + 1) * sizeof(char);
-        res = (char *)malloc(res_size);
+        res = (char*)malloc(res_size);
 
         // Join p1 and p2
         strcpy(res, p1);
@@ -204,33 +207,33 @@ char *join_path(const char *p1, const char *p2) {
     }
 }
 
-dbus_bool_t get_polybar_ipc_paths(const char *ipc_path, char **ptr_paths[],
-                                  size_t *num_of_paths) {
-    DIR *d;
-    struct dirent *dir;
+dbus_bool_t get_polybar_ipc_paths(const char* ipc_path, char** ptr_paths[],
+                                  size_t* num_of_paths) {
+    DIR* d;
+    struct dirent* dir;
     size_t i = 0;
 
     // Start with 3 paths allocated
     *num_of_paths = 3;
     // Allocate memory for num_of_paths char* pointers
-    char **paths = (char **)malloc(*num_of_paths * sizeof(char *));
+    char** paths = (char**)malloc(*num_of_paths * sizeof(char*));
 
     d = opendir(ipc_path);
 
     if (d) {
         // Iterate through every file in ipc_path
         while ((dir = readdir(d)) != NULL) {
-            const char *name = dir->d_name;
+            const char* name = dir->d_name;
 
             // Check if filename starts with polybar_mqueue
             if (strncmp(name, "polybar_mqueue", 14) == 0) {
                 // Join filename with parent path
-                char *path = join_path(ipc_path, name);
-                size_t len = strlen(path) + 1;  // +1 for null char
+                char* path = join_path(ipc_path, name);
+                size_t len = strlen(path) + 1; // +1 for null char
 
                 if (i >= *num_of_paths) {
                     // Reallocate 3 additional paths
-                    paths = (char **)realloc(paths, (i + 3) * sizeof(char *));
+                    paths = (char**)realloc(paths, (i + 3) * sizeof(char*));
                 }
 
                 paths[i] = path;
@@ -241,7 +244,7 @@ dbus_bool_t get_polybar_ipc_paths(const char *ipc_path, char **ptr_paths[],
         // Get actual number of paths
         *num_of_paths = i;
         // Reallocate array for actual number of paths
-        paths = (char **)realloc(paths, *num_of_paths * sizeof(char *));
+        paths = (char**)realloc(paths, *num_of_paths * sizeof(char*));
         // Assign address of array to pointer to array
         *ptr_paths = paths;
     } else {
@@ -253,9 +256,9 @@ dbus_bool_t get_polybar_ipc_paths(const char *ipc_path, char **ptr_paths[],
     return TRUE;
 }
 
-char *str_replace_all(const char *str, const char *find, const char *repl) {
+char* str_replace_all(const char* str, const char* find, const char* repl) {
     // Pointer to substring of str
-    const char *substr = str;
+    const char* substr = str;
 
     // # of characters that need to be allocated per replacement
     const int REPL_DIFF = strlen(repl) - strlen(find);
@@ -268,11 +271,11 @@ char *str_replace_all(const char *str, const char *find, const char *repl) {
     // made. This is an optimization for its main use case. Also add 1 for null
     // character.
     size_t new_str_size = strlen(str) + REPL_DIFF * REALLOC_RATE + 1;
-    char *new_str = (char *)calloc(new_str_size, sizeof(char));
+    char* new_str = (char*)calloc(new_str_size, sizeof(char));
 
     int num_of_replacements = 0;
 
-    char *match;
+    char* match;
     size_t actual_len = 0;
 
     // For every match
@@ -289,7 +292,7 @@ char *str_replace_all(const char *str, const char *find, const char *repl) {
             num_of_replacements % REALLOC_RATE == 0) {
             // Allocate memory for REALLOC_RATE more replacements
             new_str_size += REPL_DIFF * REALLOC_RATE * sizeof(char);
-            new_str = (char *)realloc(new_str, new_str_size);
+            new_str = (char*)realloc(new_str, new_str_size);
         }
 
         // Append substr up to offset
@@ -309,7 +312,7 @@ char *str_replace_all(const char *str, const char *find, const char *repl) {
     // Allocate exact amount of memory needed. This will release extra memory or
     // allocate more memory if no replacements were made and REPL_DIFF < 0 in
     // which case there would not be enough memory to concat substr.
-    new_str = (char *)realloc(new_str, (actual_len + 1) * sizeof(char));
+    new_str = (char*)realloc(new_str, (actual_len + 1) * sizeof(char));
 
     // Concatenate rest of substr. This must happen after reallocation in case
     // REPL_DIFF < 0 and no replacements were made.
@@ -318,18 +321,19 @@ char *str_replace_all(const char *str, const char *find, const char *repl) {
     return new_str;
 }
 
-char *str_trunc(const char *str, const int max_len, const char *trunc) {
+char* str_trunc(const char* str, const int max_len, const char* trunc) {
     const size_t len = strlen(str);
     const size_t trunc_len = strlen(trunc);
-    char *new_str;
+    char* new_str;
 
-    if (trunc_len > max_len) return NULL;
+    if (trunc_len > max_len)
+        return NULL;
 
     if (len > max_len) {
         // New size is max_len + null char
         const size_t new_str_size = max_len + 1;
 
-        new_str = (char *)calloc(new_str_size, sizeof(char));
+        new_str = (char*)calloc(new_str_size, sizeof(char));
 
         // Copy str, leaving room for trunc
         strncpy(new_str, str, max_len - trunc_len);
@@ -338,7 +342,7 @@ char *str_trunc(const char *str, const int max_len, const char *trunc) {
         // +1 for null char
         const size_t new_str_size = len + 1;
 
-        new_str = (char *)calloc(new_str_size, sizeof(char));
+        new_str = (char*)calloc(new_str_size, sizeof(char));
 
         strcpy(new_str, str);
     }
@@ -346,9 +350,9 @@ char *str_trunc(const char *str, const int max_len, const char *trunc) {
     return new_str;
 }
 
-int num_of_matches(const char *str, const char *find) {
-    const char *substr = str;
-    char *match;
+int num_of_matches(const char* str, const char* find) {
+    const char* substr = str;
+    char* match;
     int num_of_matches = 0;
 
     while (match = strstr(substr, find)) {

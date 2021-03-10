@@ -72,6 +72,17 @@ typedef enum {
     PARAM_HELP
 } PARAMETER_IDENTIFIER;
 
+/* Define the default token format */
+#define TOKEN_TITLE_TEMPLATE "%title%"
+#define TOKEN_ARTIST_TEMPLATE "%artist%"
+
+/* Define the default output format for the status option*/
+#define CONCAT(str1, str2) str1 ": " str2
+#define DEFAULT_FORMAT_TEMPLATE CONCAT(TOKEN_ARTIST_TEMPLATE, TOKEN_TITLE_TEMPLATE)
+
+const char* TOKEN_TITLE = TOKEN_TITLE_TEMPLATE;
+const char* TOKEN_ARTIST = TOKEN_ARTIST_TEMPLATE;
+
 // Predictable errors will be hidden if this is TRUE such as if spotify is not
 // running and the status is requested
 dbus_bool_t SUPPRESS_ERRORS = 0;
@@ -154,12 +165,12 @@ char* format_output(const char* artist, const char* title,
                     const int max_length, const char* format,
                     const char* trunc) {
     // Get total number of each token
-    const int NUM_OF_ARTIST_TOK = num_of_matches(format, "%artist%");
-    const int NUM_OF_TITLE_TOK = num_of_matches(format, "%title%");
+    const int NUM_OF_ARTIST_TOK = num_of_matches(format, TOKEN_ARTIST);
+    const int NUM_OF_TITLE_TOK = num_of_matches(format, TOKEN_TITLE);
 
     // Get length difference caused by a single replacement
-    const int ARTIST_REPL_DIFF = strlen(artist) - strlen("%artist%");
-    const int TITLE_REPL_DIFF = strlen(title) - strlen("%title%");
+    const int ARTIST_REPL_DIFF = strlen(artist) - strlen(TOKEN_ARTIST);
+    const int TITLE_REPL_DIFF = strlen(title) - strlen(TOKEN_TITLE);
 
     // Calculate the total untruncated length of the output
     const int TOTAL_UNTRUNC_LENGTH = strlen(format) +
@@ -196,8 +207,8 @@ char* format_output(const char* artist, const char* title,
         }
 
         // Replace all tokens with their values
-        char* temp = str_replace_all(format, "%artist%", trunc_artist);
-        char* temp2 = str_replace_all(temp, "%title%", trunc_title);
+        char* temp = str_replace_all(format, TOKEN_ARTIST, trunc_artist);
+        char* temp2 = str_replace_all(temp, TOKEN_TITLE, trunc_title);
 
         // Truncate output to max length
         if (!(output = str_trunc(temp2, max_length, trunc))) {
@@ -216,8 +227,8 @@ char* format_output(const char* artist, const char* title,
         free(trunc_artist);
     } else {
         // Replace all tokens with their values
-        char* temp = str_replace_all(format, "%artist%", artist);
-        output = str_replace_all(temp, "%title%", title);
+        char* temp = str_replace_all(format, TOKEN_ARTIST, artist);
+        output = str_replace_all(temp, TOKEN_TITLE, title);
 
         free(temp);
     }
@@ -319,9 +330,9 @@ void print_usage() {
     puts("                              specified.");
     puts("                              Default: No limit");
     puts("    --format                  The format to display the status in.");
-    puts("                              The %artist% and %title% tokens will");
+    puts("                              The " TOKEN_ARTIST_TEMPLATE " and " TOKEN_TITLE_TEMPLATE " tokens will");
     puts("                              be replaced by the artist name and");
-    puts("                                Default: '%artist%: %title%'");
+    puts("                                Default: \'" DEFAULT_FORMAT_TEMPLATE "\'");
     puts("                              track title, respectively.");
     puts("    --trunc                   The string to use to show that the");
     puts("                              artist name, track title, or output");
@@ -332,7 +343,7 @@ void print_usage() {
     puts("    -q                        Hide errors");
     puts("");
     puts("  Examples:");
-    puts("    spotifyctl status --format '%artist%: %title%' \\");
+    puts("    spotifyctl status --format \'" TOKEN_ARTIST_TEMPLATE ": " TOKEN_TITLE_TEMPLATE "\' \\");
     puts("        --max-length 30 --max-artist-length 10 \\");
     puts("        --max-title-length 20 --trunc '...'");
     puts("    If artist name is 'Eminem' and track title is");
@@ -340,7 +351,7 @@ void print_usage() {
     puts("    Eminem: Sing For The Moment");
     puts("    since the total length is less than 30 characters.");
     puts("");
-    puts("    spotifyctl status --format '%artist%: %title%' \\");
+    puts("    spotifyctl status --format \'" TOKEN_ARTIST_TEMPLATE ": " TOKEN_TITLE_TEMPLATE "\' \\");
     puts("        --max-length 20 --max-artist-length 10 \\");
     puts("        --max-title-length 10 --trunc '...'");
     puts("    If artist name is 'Eminem' and track title is");
@@ -348,7 +359,7 @@ void print_usage() {
     puts("    Eminem: Sing Fo...");
     puts("    since the total length is less than 30 characters.");
     puts("");
-    puts("    spotifyctl status --format '%artist%: %title%' \\");
+    puts("    spotifyctl status --format \'" TOKEN_ARTIST_TEMPLATE ": " TOKEN_TITLE_TEMPLATE "\' \\");
     puts("        --max-title-length 13 --trunc '...'");
     puts("    If artist name is 'Eminem' and track title is");
     puts("    'Sing For The Moment', the output will be:");
@@ -365,7 +376,7 @@ int main(int argc, char* argv[]) {
     int max_artist_length = INT_MAX;
     int max_title_length = INT_MAX;
     int max_length = INT_MAX;
-    char* status_format = "%artist%: %title%";
+    char* status_format = DEFAULT_FORMAT_TEMPLATE;
     char* trunc = "...";
 
     // Parameter index found in list
@@ -467,36 +478,37 @@ int main(int argc, char* argv[]) {
 
     // Call function based on command supplied
     switch (prog_mode) {
-        case MODE_NONE:
+        case MODE_NONE: {
             fputs("No command specified\n", stderr);
             fputs("Try 'spotifyctl help' for more information\n", stderr);
             dbus_connection_unref(connection);
             return 1;
-
-        case MODE_STATUS:
+        }
+        case MODE_STATUS: {
             get_status(connection, max_artist_length, max_title_length,
                        max_length, status_format, trunc);
             break;
-
-        case MODE_PLAY:
+        }
+        case MODE_PLAY: {
             spotify_player_call(connection, PLAYER_METHOD_PLAY);
             break;
-
-        case MODE_PAUSE:
+        }
+        case MODE_PAUSE: {
             spotify_player_call(connection, PLAYER_METHOD_PAUSE);
             break;
-
-        case MODE_PLAYPAUSE:
+        }
+        case MODE_PLAYPAUSE: {
             spotify_player_call(connection, PLAYER_METHOD_PLAYPAUSE);
             break;
-
-        case MODE_NEXT:
+        }
+        case MODE_NEXT: {
             spotify_player_call(connection, PLAYER_METHOD_NEXT);
             break;
-
-        case MODE_PREVIOUS:
+        }
+        case MODE_PREVIOUS: {
             spotify_player_call(connection, PLAYER_METHOD_PREVIOUS);
             break;
+        }
     }
 
     dbus_connection_unref(connection);

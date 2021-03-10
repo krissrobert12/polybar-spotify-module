@@ -12,14 +12,14 @@
  *                string. Otherwise, it returns a NULL pointer. This pointer
  *                must be freed by the caller.
  */
-char *iter_get_string(DBusMessageIter *iter);
+char* iter_get_string(DBusMessageIter* iter);
 
 /**
  * Prints the string pointed to by a DBusMessageIter
  *
  * @param DBusMessage* iter The iterator pointing to a string
  */
-void print_string_iter(DBusMessageIter *iter);
+void print_string_iter(DBusMessageIter* iter);
 
 /**
  * Initialize subiter inside the container pointed to be iter if it is of the
@@ -34,8 +34,8 @@ void print_string_iter(DBusMessageIter *iter);
  *                      the container and the subiter is successfully
  *                      initialized, otherwise returns FALSE.
  */
-dbus_bool_t recurse_iter_of_type(DBusMessageIter *iter,
-                                 DBusMessageIter *subiter, const int type);
+dbus_bool_t recurse_iter_of_type(DBusMessageIter* iter,
+                                 DBusMessageIter* subiter, const int type);
 
 /**
  * Initialize subiter inside the container pointed to be iter if it is of the
@@ -50,9 +50,9 @@ dbus_bool_t recurse_iter_of_type(DBusMessageIter *iter,
  *                      signature of the container and the subiter is
  *                      successfully initialized, otherwise returns FALSE.
  */
-dbus_bool_t recurse_iter_of_signature(DBusMessageIter *iter,
-                                      DBusMessageIter *subiter,
-                                      const char *signature);
+dbus_bool_t recurse_iter_of_signature(DBusMessageIter* iter,
+                                      DBusMessageIter* subiter,
+                                      const char* signature);
 
 /**
  * Initialize entry_iter at an array dict element matching the specified key.
@@ -67,8 +67,8 @@ dbus_bool_t recurse_iter_of_signature(DBusMessageIter *iter,
  *                      key is found and the entry_iter is successfully
  *                      initialized, otherwise returns FALSE.
  */
-dbus_bool_t iter_go_to_key(DBusMessageIter *array_iter,
-                           DBusMessageIter *entry_iter, const char *key);
+dbus_bool_t iter_go_to_key(DBusMessageIter* array_iter,
+                           DBusMessageIter* entry_iter, const char* key);
 
 /**
  * Try to recurse the iter into a container that it is pointing at with the
@@ -82,7 +82,7 @@ dbus_bool_t iter_go_to_key(DBusMessageIter *array_iter,
  *                      the container and the iter is successfully inside the
  *                      container, otherwise returns FALSE.
  */
-dbus_bool_t iter_try_step_into_type(DBusMessageIter *iter, const int type);
+dbus_bool_t iter_try_step_into_type(DBusMessageIter* iter, const int type);
 
 /**
  * Try to recurse the iter into a container that it is pointing at with the
@@ -97,8 +97,8 @@ dbus_bool_t iter_try_step_into_type(DBusMessageIter *iter, const int type);
  *                      initialized inside the container, otherwise returns
  *                      FALSE.
  */
-dbus_bool_t iter_try_step_into_signature(DBusMessageIter *iter,
-                                         const char *signature);
+dbus_bool_t iter_try_step_into_signature(DBusMessageIter* iter,
+                                         const char* signature);
 
 /**
  * Try to recurse the iter into an array of dictionary entries and set the iter
@@ -115,8 +115,8 @@ dbus_bool_t iter_try_step_into_signature(DBusMessageIter *iter,
  *                      at the value of this dictionary entry, otherwise
  *                      returns FALSE.
  */
-dbus_bool_t iter_try_step_to_key(DBusMessageIter *element_iter,
-                                 const char *key);
+dbus_bool_t iter_try_step_to_key(DBusMessageIter* element_iter,
+                                 const char* key);
 
 /**
  * Sleep milliseconds
@@ -141,8 +141,8 @@ dbus_bool_t msleep(const long milliseconds);
  * @returns dbus_bool_t Returns TRUE if the directory is successfully searched
  *                      for paths, otherwise FALSE.
  */
-dbus_bool_t get_polybar_ipc_paths(const char *ipc_path, char **ptr_paths[],
-                                  size_t *num_of_paths);
+dbus_bool_t get_polybar_ipc_paths(const char* ipc_path, char** ptr_paths[],
+                                  size_t* num_of_paths);
 
 /**
  * Join two paths together. This function takes into account if the first path
@@ -155,7 +155,7 @@ dbus_bool_t get_polybar_ipc_paths(const char *ipc_path, char **ptr_paths[],
  * @returns char* The path with p1 and p2 joined together and NULL on error.
  *                This pointer must be freed by the caller.
  */
-char *join_path(const char *p1, const char *p2);
+char* join_path(const char* p1, const char* p2);
 
 /**
  * Replace all instances of a given string in a source string with another
@@ -168,7 +168,7 @@ char *join_path(const char *p1, const char *p2);
  *
  * @returns char* A new string with the replacements made if any.
  */
-char* str_replace_all(const char *str, const char *find, const char *repl);
+char* str_replace_all(const char* str, const char* find, const char* repl);
 
 /**
  * Truncate the specified string if it longer than the specified maximum length
@@ -181,7 +181,7 @@ char* str_replace_all(const char *str, const char *find, const char *repl);
  * @returns char* The truncated string. If str is longer than max_len, str will
  * be cut off at max_len, and the end of the string will be replaced with trunc.
  */
-char* str_trunc(const char *str, const int max_len, const char *trunc);
+char* str_trunc(const char* str, const int max_len, const char* trunc);
 
 /**
  * Find the number of matches of a given string in another string. This works
@@ -194,6 +194,6 @@ char* str_trunc(const char *str, const int max_len, const char *trunc);
  *
  * @returns int The number of matches found
  */
-int num_of_matches(const char *str, const char *find);
+int num_of_matches(const char* str, const char* find);
 
 #endif

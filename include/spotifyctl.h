@@ -10,7 +10,7 @@
  * @param DBusMessage* msg The Metadata property DBusMessage
  * @returns char* The title of the currently playing track
  */
-char *get_song_title_from_metadata(DBusMessage *msg);
+char* get_song_title_from_metadata(DBusMessage* msg);
 
 /**
  * Extract the artist of the currently playing song on spotify from a
@@ -19,7 +19,7 @@ char *get_song_title_from_metadata(DBusMessage *msg);
  * @param DBusMessage* msg The Metadata property DBusMessage
  * @returns char* The artist of the currently playing track
  */
-char *get_song_artist_from_metadata(DBusMessage *msg);
+char* get_song_artist_from_metadata(DBusMessage* msg);
 
 /**
  * Build the output message according to the specified format options
@@ -47,10 +47,10 @@ char *get_song_artist_from_metadata(DBusMessage *msg);
  *                string will be replaced with trunc while sataisfying the
  *                max length constraints.
  */
-char *format_output(const char *artist, const char *title,
+char* format_output(const char* artist, const char* title,
                     const int max_artist_length, const int max_title_length,
-                    const int max_length, const char *format,
-                    const char *trunc);
+                    const int max_length, const char* format,
+                    const char* trunc);
 
 /**
  * Prints the status output message according to the specified format options
@@ -68,9 +68,9 @@ char *format_output(const char *artist, const char *title,
  *                    or output ends and will honor the max length constraints.
  *
  */
-void get_status(DBusConnection *connection, const int max_artist_length,
+void get_status(DBusConnection* connection, const int max_artist_length,
                 const int max_title_length, const int max_length,
-                const char *format, const char *trunc);
+                const char* format, const char* trunc);
 
 /**
  * Call the specified org.mpris.MediaPlayer2.Player method
@@ -79,7 +79,7 @@ void get_status(DBusConnection *connection, const int max_artist_length,
  * @param const char* method The name of the org.mpris.MediaPlayer2.Player
  *                           method to call.
  */
-void spotify_player_call(DBusConnection *connection, const char *method);
+void spotify_player_call(DBusConnection* connection, const char* method);
 
 /**
  * Print spotifyctl usage information
@@ -92,6 +92,6 @@ void print_usage();
  * @param int argc The number of arguments
  * @param char** argv An array of arguments
  */
-int main(int argc, char *argv[]);
+int main(int argc, char* argv[]);
 
-#endif  // _SPOTIFY_STATUS_H_ include guard
+#endif // _SPOTIFY_STATUS_H_ include guard

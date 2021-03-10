@@ -16,30 +16,31 @@ const dbus_bool_t VERBOSE = TRUE;
 const dbus_bool_t VERBOSE = FALSE;
 #endif
 
-const char *POLYBAR_IPC_DIRECTORY = "/tmp";
+const char* POLYBAR_IPC_DIRECTORY = "/tmp";
 
 // Used to check if track has changed
-char *last_trackid = NULL;
+char* last_trackid = NULL;
 
 // Current state of spotify
-typedef enum { PLAYING, PAUSED, EXITED } SpotifyState;
+typedef enum { PLAYING,
+               PAUSED,
+               EXITED } SpotifyState;
 SpotifyState CURRENT_SPOTIFY_STATE = EXITED;
 
 // DBus signals to listen for
-const char *PROPERTIES_CHANGED_MATCH =
+const char* PROPERTIES_CHANGED_MATCH =
     "interface='org.freedesktop.DBus.Properties',member='PropertiesChanged',"
     "path='/org/mpris/MediaPlayer2'";
-const char *NAME_OWNER_CHANGED_MATCH =
+const char* NAME_OWNER_CHANGED_MATCH =
     "interface='org.freedesktop.DBus',member='NameOwnerChanged',path='/org/"
     "freedesktop/DBus'";
 
-
-dbus_bool_t update_last_trackid(const char *trackid) {
+dbus_bool_t update_last_trackid(const char* trackid) {
     if (trackid != NULL) {
         // +1 for null char
         size_t size = strlen(trackid) + 1;
 
-        last_trackid = (char *)realloc(last_trackid, size);
+        last_trackid = (char*)realloc(last_trackid, size);
         last_trackid[0] = '\0';
 
         strcpy(last_trackid, trackid);
@@ -50,12 +51,13 @@ dbus_bool_t update_last_trackid(const char *trackid) {
     }
 }
 
-dbus_bool_t spotify_update_track(const char *current_trackid) {
+dbus_bool_t spotify_update_track(const char* current_trackid) {
     // If trackid didn't change
     if (last_trackid != NULL && strcmp(current_trackid, last_trackid) != 0) {
         puts("Track Changed");
         // Send message to update track name
-        if (send_ipc_polybar(1, "hook:module/spotify2")) return TRUE;
+        if (send_ipc_polybar(1, "hook:module/spotify2"))
+            return TRUE;
     }
     return FALSE;
 }
@@ -102,7 +104,7 @@ dbus_bool_t spotify_exited() {
 }
 
 dbus_bool_t send_ipc_polybar(int numOfMsgs, ...) {
-    char **paths;
+    char** paths;
     size_t num_of_paths;
     va_list args;
 
@@ -110,11 +112,11 @@ dbus_bool_t send_ipc_polybar(int numOfMsgs, ...) {
     get_polybar_ipc_paths(POLYBAR_IPC_DIRECTORY, &paths, &num_of_paths);
 
     for (size_t p = 0; p < num_of_paths; p++) {
-        FILE *fp;
+        FILE* fp;
 
         va_start(args, numOfMsgs);
         for (int m = 0; m < numOfMsgs; m++) {
-            const char *message = va_arg(args, char *);
+            const char* message = va_arg(args, char*);
 
             fp = fopen(paths[p], "w");
             fputs(message, fp);
@@ -136,10 +138,11 @@ dbus_bool_t send_ipc_polybar(int numOfMsgs, ...) {
     return TRUE;
 }
 
-DBusHandlerResult properties_changed_handler(DBusConnection *connection,
-                                             DBusMessage *message,
-                                             void *user_data) {
-    if (VERBOSE) puts("Running properties_changed_handler");
+DBusHandlerResult properties_changed_handler(DBusConnection* connection,
+                                             DBusMessage* message,
+                                             void* user_data) {
+    if (VERBOSE)
+        puts("Running properties_changed_handler");
     DBusMessageIter iter;
     DBusMessageIter sub_iter;
     dbus_bool_t is_spotify = FALSE;
@@ -169,7 +172,7 @@ DBusHandlerResult properties_changed_handler(DBusConnection *connection,
      *
      */
 
-    char *interface_name = iter_get_string(&iter);
+    char* interface_name = iter_get_string(&iter);
 
     // Check if interface is correct
     if (interface_name != NULL &&
@@ -203,13 +206,14 @@ DBusHandlerResult properties_changed_handler(DBusConnection *connection,
     }
 
     // Make sure trackid begins with spotify
-    char *trackid = iter_get_string(&sub_iter);
+    char* trackid = iter_get_string(&sub_iter);
     if (trackid != NULL && strncmp(trackid, "spotify", 7) == 0) {
         spotify_update_track(trackid);
         update_last_trackid(trackid);
         is_spotify = TRUE;
 
-        if (VERBOSE) puts("Spotify Detected");
+        if (VERBOSE)
+            puts("Spotify Detected");
     }
 
     free(trackid);
@@ -227,7 +231,7 @@ DBusHandlerResult properties_changed_handler(DBusConnection *connection,
         }
 
         // Update polybar modules
-        char *status = iter_get_string(&sub_iter);
+        char* status = iter_get_string(&sub_iter);
         if (strcmp(status, "Paused") == 0) {
             spotify_paused();
         } else if (strcmp(status, "Playing") == 0) {
@@ -240,14 +244,15 @@ DBusHandlerResult properties_changed_handler(DBusConnection *connection,
     return DBUS_HANDLER_RESULT_HANDLED;
 }
 
-DBusHandlerResult name_owner_changed_handler(DBusConnection *connection,
-                                             DBusMessage *message,
-                                             void *user_data) {
-    if (VERBOSE) puts("Starting handler for name owner changed");
+DBusHandlerResult name_owner_changed_handler(DBusConnection* connection,
+                                             DBusMessage* message,
+                                             void* user_data) {
+    if (VERBOSE)
+        puts("Starting handler for name owner changed");
 
-    const char *name;
-    const char *old_owner;
-    const char *new_owner;
+    const char* name;
+    const char* old_owner;
+    const char* new_owner;
 
     /**
      * Format of NameOwnerChanged signal
@@ -275,10 +280,10 @@ DBusHandlerResult name_owner_changed_handler(DBusConnection *connection,
     return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
 }
 
-void free_user_data(void *memory) {}
+void free_user_data(void* memory) {}
 
 int main() {
-    DBusConnection *connection;
+    DBusConnection* connection;
     DBusError err;
 
     dbus_error_init(&err);
@@ -320,7 +325,8 @@ int main() {
 
     // Read messages and call handlers when neccessary
     while (dbus_connection_read_write_dispatch(connection, -1)) {
-        if (VERBOSE) puts("In dispatch loop");
+        if (VERBOSE)
+            puts("In dispatch loop");
     }
 
     dbus_connection_unref(connection);

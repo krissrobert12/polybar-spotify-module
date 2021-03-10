@@ -27,9 +27,9 @@ dbus_bool_t send_ipc_polybar(int numOfMsgs, ...);
  * DBUS_HANDLER_RESULT_HANDLED if it was a signal from spotify contianing the
  * desired information, otherwise returns DBUS_HANDLER_RESULT_NOT_YET_HANDLED.
  */
-DBusHandlerResult properties_changed_handler(DBusConnection *connection,
-                                             DBusMessage *message,
-                                             void *user_data);
+DBusHandlerResult properties_changed_handler(DBusConnection* connection,
+                                             DBusMessage* message,
+                                             void* user_data);
 
 /**
  * DBus handler function for NameOwnerChanged signals. This is automatically
@@ -44,9 +44,9 @@ DBusHandlerResult properties_changed_handler(DBusConnection *connection,
  * DBUS_HANDLER_RESULT_HANDLED if it was a signal from spotify indicating a
  * disconnection, otherwise returns DBUS_HANDLER_RESULT_NOT_YET_HANDLED.
  */
-DBusHandlerResult name_owner_changed_handler(DBusConnection *connection,
-                                             DBusMessage *message,
-                                             void *user_data);
+DBusHandlerResult name_owner_changed_handler(DBusConnection* connection,
+                                             DBusMessage* message,
+                                             void* user_data);
 
 /**
  * Dummy function used by DBus Handlers for extra user data. Since the handler
@@ -55,7 +55,7 @@ DBusHandlerResult name_owner_changed_handler(DBusConnection *connection,
  * @param void* memory Pointer to memory passed to the handler function to be
  * freed.
  */
-void free_user_data(void *memory);
+void free_user_data(void* memory);
 
 /**
  * Updates current stored spotify state and sends IPC messages to polybar to
@@ -94,7 +94,7 @@ dbus_bool_t spotify_exited();
  *
  * @returns TRUE if no error, otherwise FALSE.
  */
-dbus_bool_t update_last_trackid(const char *trackid);
+dbus_bool_t update_last_trackid(const char* trackid);
 
 /**
  * If the trackid has changed, an IPC message is sent to polybar to the status
@@ -104,6 +104,6 @@ dbus_bool_t update_last_trackid(const char *trackid);
  *
  * @returns dbus_bool_t TRUE if the trackid has changed, FALSE otherwise
  */
-dbus_bool_t spotify_update_track(const char *current_trackid);
+dbus_bool_t spotify_update_track(const char* current_trackid);
 
 #endif
