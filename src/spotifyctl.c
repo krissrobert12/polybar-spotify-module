@@ -8,23 +8,23 @@
 #include "../include/utils.h"
 
 /*************** Constants for DBus ***************/
-const char *DESTINATION = "org.mpris.MediaPlayer2.spotify";
-const char *PATH = "/org/mpris/MediaPlayer2";
+const char* DESTINATION = "org.mpris.MediaPlayer2.spotify";
+const char* PATH = "/org/mpris/MediaPlayer2";
 
-const char *STATUS_IFACE = "org.freedesktop.DBus.Properties";
-const char *STATUS_METHOD = "Get";
-const char *STATUS_METHOD_ARG_IFACE_NAME = "org.mpris.MediaPlayer2.Player";
-const char *STATUS_METHOD_ARG_PROPERTY_NAME = "Metadata";
+const char* STATUS_IFACE = "org.freedesktop.DBus.Properties";
+const char* STATUS_METHOD = "Get";
+const char* STATUS_METHOD_ARG_IFACE_NAME = "org.mpris.MediaPlayer2.Player";
+const char* STATUS_METHOD_ARG_PROPERTY_NAME = "Metadata";
 
-const char *PLAYER_IFACE = "org.mpris.MediaPlayer2.Player";
-const char *PLAYER_METHOD_PLAY = "Play";
-const char *PLAYER_METHOD_PAUSE = "Pause";
-const char *PLAYER_METHOD_PLAYPAUSE = "PlayPause";
-const char *PLAYER_METHOD_NEXT = "Next";
-const char *PLAYER_METHOD_PREVIOUS = "Previous";
+const char* PLAYER_IFACE = "org.mpris.MediaPlayer2.Player";
+const char* PLAYER_METHOD_PLAY = "Play";
+const char* PLAYER_METHOD_PAUSE = "Pause";
+const char* PLAYER_METHOD_PLAYPAUSE = "PlayPause";
+const char* PLAYER_METHOD_NEXT = "Next";
+const char* PLAYER_METHOD_PREVIOUS = "Previous";
 
-const char *METADATA_TITLE_KEY = "xesam:title";
-const char *METADATA_ARTIST_KEY = "xesam:artist";
+const char* METADATA_TITLE_KEY = "xesam:title";
+const char* METADATA_ARTIST_KEY = "xesam:artist";
 
 /*** Program Mode ***/
 typedef enum {
@@ -37,16 +37,51 @@ typedef enum {
     MODE_PLAYPAUSE
 } ProgMode;
 
+/*Constant for script options */
+const char* const PARAMETERS[] = {
+    "-q",
+    "--max-artist-length",
+    "--max-title-length",
+    "--max-length",
+    "--format",
+    "--trunc",
+    "status",
+    "play",
+    "pause",
+    "playpause",
+    "next",
+    "previous",
+    "help"};
+
+const char PARAMETERS_LEN = sizeof(PARAMETERS) / sizeof(char*);
+
+/* Parameter identifiers placed in order as in PARAMETERS constant */
+typedef enum {
+    PARAM_SUPRESS_ERRORS,
+    PARAM_MAX_ARTIST_LENGTH,
+    PARAM_MAX_TITLE_LENGTH,
+    PARAM_MAX_LENGTH,
+    PARAM_FORMAT,
+    PARAM_TRUNC,
+    PARAM_STATUS,
+    PARAM_PLAY,
+    PARAM_PAUSE,
+    PARAM_PLAYPAUSE,
+    PARAM_NEXT,
+    PARAM_PREVIOUS,
+    PARAM_HELP
+} PARAMETER_IDENTIFIER;
+
 // Predictable errors will be hidden if this is TRUE such as if spotify is not
 // running and the status is requested
 dbus_bool_t SUPPRESS_ERRORS = 0;
 
-char *get_song_title_from_metadata(DBusMessage *msg) {
+char* get_song_title_from_metadata(DBusMessage* msg) {
     DBusMessageIter iter;
 
     dbus_message_iter_init(msg, &iter);
 
-    char *title = NULL;
+    char* title = NULL;
 
     // The message looks like this:
     // string "org.mpris.MediaPlayer2.Player"
@@ -77,12 +112,12 @@ char *get_song_title_from_metadata(DBusMessage *msg) {
     return title;
 }
 
-char *get_song_artist_from_metadata(DBusMessage *msg) {
+char* get_song_artist_from_metadata(DBusMessage* msg) {
     DBusMessageIter iter;
 
     dbus_message_iter_init(msg, &iter);
 
-    char *artist = NULL;
+    char* artist = NULL;
 
     // The message looks like this:
     // string "org.mpris.MediaPlayer2.Player"
@@ -114,10 +149,10 @@ char *get_song_artist_from_metadata(DBusMessage *msg) {
     return artist;
 }
 
-char *format_output(const char *artist, const char *title,
+char* format_output(const char* artist, const char* title,
                     const int max_artist_length, const int max_title_length,
-                    const int max_length, const char *format,
-                    const char *trunc) {
+                    const int max_length, const char* format,
+                    const char* trunc) {
     // Get total number of each token
     const int NUM_OF_ARTIST_TOK = num_of_matches(format, "%artist%");
     const int NUM_OF_TITLE_TOK = num_of_matches(format, "%title%");
@@ -131,13 +166,13 @@ char *format_output(const char *artist, const char *title,
                                      NUM_OF_ARTIST_TOK * ARTIST_REPL_DIFF +
                                      NUM_OF_TITLE_TOK * TITLE_REPL_DIFF;
 
-    char *output;
+    char* output;
 
     // Truncate artist and title only if total untruncated length > max_length
     // and max_length was specified
     if (max_length == INT_MAX || TOTAL_UNTRUNC_LENGTH > max_length) {
-        char *trunc_title;
-        char *trunc_artist;
+        char* trunc_title;
+        char* trunc_artist;
 
         // Truncate artist and track title using the truncation string
         if (!(trunc_title = str_trunc(title, max_title_length, trunc))) {
@@ -161,8 +196,8 @@ char *format_output(const char *artist, const char *title,
         }
 
         // Replace all tokens with their values
-        char *temp = str_replace_all(format, "%artist%", trunc_artist);
-        char *temp2 = str_replace_all(temp, "%title%", trunc_title);
+        char* temp = str_replace_all(format, "%artist%", trunc_artist);
+        char* temp2 = str_replace_all(temp, "%title%", trunc_title);
 
         // Truncate output to max length
         if (!(output = str_trunc(temp2, max_length, trunc))) {
@@ -181,7 +216,7 @@ char *format_output(const char *artist, const char *title,
         free(trunc_artist);
     } else {
         // Replace all tokens with their values
-        char *temp = str_replace_all(format, "%artist%", artist);
+        char* temp = str_replace_all(format, "%artist%", artist);
         output = str_replace_all(temp, "%title%", title);
 
         free(temp);
@@ -190,14 +225,14 @@ char *format_output(const char *artist, const char *title,
     return output;
 }
 
-void get_status(DBusConnection *connection, const int max_artist_length,
+void get_status(DBusConnection* connection, const int max_artist_length,
                 const int max_title_length, const int max_length,
-                const char *format, const char *trunc) {
+                const char* format, const char* trunc) {
     DBusError err;
     dbus_error_init(&err);
 
     // Send a message requesting the properties
-    DBusMessage *msg = dbus_message_new_method_call(
+    DBusMessage* msg = dbus_message_new_method_call(
         DESTINATION, PATH, STATUS_IFACE, STATUS_METHOD);
 
     // Message looks like this:
@@ -208,20 +243,21 @@ void get_status(DBusConnection *connection, const int max_artist_length,
         &STATUS_METHOD_ARG_PROPERTY_NAME, DBUS_TYPE_INVALID);
 
     // Send and receive reply
-    DBusMessage *reply;
+    DBusMessage* reply;
     reply =
         dbus_connection_send_with_reply_and_block(connection, msg, 10000, &err);
     dbus_message_unref(msg);
 
     if (dbus_error_is_set(&err)) {
-        if (!SUPPRESS_ERRORS) fputs(err.message, stderr);
+        if (!SUPPRESS_ERRORS)
+            fputs(err.message, stderr);
         exit(1);
     }
 
-    char *title = get_song_title_from_metadata(reply);
-    char *artist = get_song_artist_from_metadata(reply);
+    char* title = get_song_title_from_metadata(reply);
+    char* artist = get_song_artist_from_metadata(reply);
 
-    char *output = format_output(artist, title, max_artist_length,
+    char* output = format_output(artist, title, max_artist_length,
                                  max_title_length, max_length, format, trunc);
 
     puts(output);
@@ -233,19 +269,20 @@ void get_status(DBusConnection *connection, const int max_artist_length,
     dbus_message_unref(reply);
 }
 
-void spotify_player_call(DBusConnection *connection, const char *method) {
+void spotify_player_call(DBusConnection* connection, const char* method) {
     DBusError err;
     dbus_error_init(&err);
 
     // Call a org.mpris.MediaPlayer2.Player method
-    DBusMessage *msg =
+    DBusMessage* msg =
         dbus_message_new_method_call(DESTINATION, PATH, PLAYER_IFACE, method);
 
     dbus_connection_send_with_reply_and_block(connection, msg, 10000, &err);
     dbus_message_unref(msg);
 
     if (dbus_error_is_set(&err)) {
-        if (!SUPPRESS_ERRORS) fputs(err.message, stderr);
+        if (!SUPPRESS_ERRORS)
+            fputs(err.message, stderr);
         exit(1);
     }
 }
@@ -319,8 +356,8 @@ void print_usage() {
     puts("    since the total length is less than 30 characters.");
 }
 
-int main(int argc, char *argv[]) {
-    DBusConnection *connection;
+int main(int argc, char* argv[]) {
+    DBusConnection* connection;
     DBusError err;
 
     // Default options
@@ -328,55 +365,94 @@ int main(int argc, char *argv[]) {
     int max_artist_length = INT_MAX;
     int max_title_length = INT_MAX;
     int max_length = INT_MAX;
-    char *status_format = "%artist%: %title%";
-    char *trunc = "...";
+    char* status_format = "%artist%: %title%";
+    char* trunc = "...";
+
+    // Parameter index found in list
+    PARAMETER_IDENTIFIER param_index;
 
     // Parse commandline options
     for (size_t i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "-q") == 0) {
-            SUPPRESS_ERRORS = 1;
-        } else if (strcmp(argv[i], "--max-artist-length") == 0) {
-            max_artist_length = atoi(argv[++i]);
-            if (max_artist_length <= 0) {
-                fputs("Artist length must be a positive integer!\n", stderr);
+        param_index = -1;
+
+        for (int j = 0; j < PARAMETERS_LEN; j++) {
+            if (strcmp(argv[i], PARAMETERS[j]) == 0) {
+                param_index = j;
+                break;
+            }
+        }
+
+        switch (param_index) {
+            case PARAM_SUPRESS_ERRORS: {
+                SUPPRESS_ERRORS = 1;
+                break;
+            }
+            case PARAM_MAX_ARTIST_LENGTH: {
+                max_artist_length = atoi(argv[++i]);
+                if (max_artist_length <= 0) {
+                    fputs("Artist length must be a positive integer!\n", stderr);
+                    return 1;
+                }
+                break;
+            }
+            case PARAM_MAX_TITLE_LENGTH: {
+                max_title_length = atoi(argv[++i]);
+                if (max_title_length <= 0) {
+                    fputs("Title length must be a positive integer!\n", stderr);
+                    return 1;
+                }
+                break;
+            }
+            case PARAM_MAX_LENGTH: {
+                max_length = atoi(argv[++i]);
+                if (max_length <= 0) {
+                    fputs("Max length must be a positive integer!\n", stderr);
+                    return 1;
+                }
+                break;
+            }
+            case PARAM_FORMAT: {
+                status_format = argv[++i];
+                break;
+            }
+            case PARAM_TRUNC: {
+                trunc = argv[++i];
+                break;
+            }
+            case PARAM_STATUS: {
+                prog_mode = MODE_STATUS;
+                break;
+            }
+            case PARAM_PLAY: {
+                prog_mode = MODE_PLAY;
+                break;
+            }
+            case PARAM_PAUSE: {
+                prog_mode = MODE_PAUSE;
+                break;
+            }
+            case PARAM_PLAYPAUSE: {
+                prog_mode = MODE_PLAYPAUSE;
+                break;
+            }
+            case PARAM_NEXT: {
+                prog_mode = MODE_NEXT;
+                break;
+            }
+            case PARAM_PREVIOUS: {
+                prog_mode = MODE_PREVIOUS;
+                break;
+            }
+            case PARAM_HELP: {
+                print_usage();
+                return 0;
+            }
+            default: {
+                fprintf(stderr, "Invalid option '%s'\n", argv[i]);
+                fputs("usage: spotifyctl [ -q ] [options] <command>\n", stderr);
+                fputs("Try 'spotifyctl help' for more information\n", stderr);
                 return 1;
             }
-        } else if (strcmp(argv[i], "--max-title-length") == 0) {
-            max_title_length = atoi(argv[++i]);
-            if (max_title_length <= 0) {
-                fputs("Title length must be a positive integer!\n", stderr);
-                return 1;
-            }
-        } else if (strcmp(argv[i], "--max-length") == 0) {
-            max_length = atoi(argv[++i]);
-            if (max_length <= 0) {
-                fputs("Max length must be a positive integer!\n", stderr);
-                return 1;
-            }
-        } else if (strcmp(argv[i], "--format") == 0) {
-            status_format = argv[++i];
-        } else if (strcmp(argv[i], "--trunc") == 0) {
-            trunc = argv[++i];
-        } else if (strcmp(argv[i], "status") == 0) {
-            prog_mode = MODE_STATUS;
-        } else if (strcmp(argv[i], "play") == 0) {
-            prog_mode = MODE_PLAY;
-        } else if (strcmp(argv[i], "pause") == 0) {
-            prog_mode = MODE_PAUSE;
-        } else if (strcmp(argv[i], "playpause") == 0) {
-            prog_mode = MODE_PLAYPAUSE;
-        } else if (strcmp(argv[i], "next") == 0) {
-            prog_mode = MODE_NEXT;
-        } else if (strcmp(argv[i], "previous") == 0) {
-            prog_mode = MODE_PREVIOUS;
-        } else if (strcmp(argv[i], "help") == 0) {
-            print_usage();
-            return 0;
-        } else {
-            fprintf(stderr, "Invalid option '%s'\n", argv[i]);
-            fputs("usage: spotifyctl [ -q ] [options] <command>\n", stderr);
-            fputs("Try 'spotifyctl help' for more information\n", stderr);
-            return 1;
         }
     }
 
@@ -384,7 +460,8 @@ int main(int argc, char *argv[]) {
 
     // Connect to session bus
     if (!(connection = dbus_bus_get(DBUS_BUS_SESSION, &err))) {
-        if (!SUPPRESS_ERRORS) fputs(err.message, stderr);
+        if (!SUPPRESS_ERRORS)
+            fputs(err.message, stderr);
         return 1;
     }
 

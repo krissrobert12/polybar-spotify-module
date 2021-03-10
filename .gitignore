@@ -2,3 +2,4 @@
 .vgcore.*
 bin/
 obj/
+/.vscode
