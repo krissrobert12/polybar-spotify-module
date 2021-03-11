@@ -80,6 +80,9 @@ typedef enum {
 #define CONCAT(str1, str2) str1 ": " str2
 #define DEFAULT_FORMAT_TEMPLATE CONCAT(TOKEN_ARTIST_TEMPLATE, TOKEN_TITLE_TEMPLATE)
 
+/* Placeholder for format output */
+const char* DEFAULT_PLACEHOLDER = "Spotify";
+
 const char* TOKEN_TITLE = TOKEN_TITLE_TEMPLATE;
 const char* TOKEN_ARTIST = TOKEN_ARTIST_TEMPLATE;
 
@@ -164,6 +167,24 @@ char* format_output(const char* artist, const char* title,
                     const int max_artist_length, const int max_title_length,
                     const int max_length, const char* format,
                     const char* trunc) {
+
+    // The string that will be displayed in the bar
+    char* output;
+
+    // Get lengths for input data
+    int artist_len = strlen(artist);
+    int title_len = strlen(title);
+
+    if (!artist_len && !title_len) {
+        output = (char*)malloc((strlen(DEFAULT_PLACEHOLDER) + 1) * sizeof(char));
+        if (output == NULL) {
+            fprintf(stderr, "Failed output alloc\n");
+            exit(1);
+        }
+        strcpy(output, DEFAULT_PLACEHOLDER);
+        return output;
+    }
+
     // Get total number of each token
     const int NUM_OF_ARTIST_TOK = num_of_matches(format, TOKEN_ARTIST);
     const int NUM_OF_TITLE_TOK = num_of_matches(format, TOKEN_TITLE);
@@ -176,8 +197,6 @@ char* format_output(const char* artist, const char* title,
     const int TOTAL_UNTRUNC_LENGTH = strlen(format) +
                                      NUM_OF_ARTIST_TOK * ARTIST_REPL_DIFF +
                                      NUM_OF_TITLE_TOK * TITLE_REPL_DIFF;
-
-    char* output;
 
     // Truncate artist and title only if total untruncated length > max_length
     // and max_length was specified
